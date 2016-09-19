@@ -156,18 +156,3 @@ class DroidPresInstance:
         except Exception as e:
             Log(e, True)
             raise
-    
-    def SetLocation(self, AgentID, location):
-        try:
-            if not AgentID:
-                raise Exception(self.ERR_AgentID)
-
-            if DEBUG_LEVEL > 0:
-                Log("SetLocation:\t AgentID=%d, Location count=%d" % (AgentID, len(location)))
-            return proxy.SetLocation(AgentID, location)
-        except AttributeError as e:
-            Log(e, True)
-            return False
-        except Exception as e:
-            Log(e, True)
-            raise

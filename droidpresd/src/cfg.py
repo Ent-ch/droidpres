@@ -9,15 +9,14 @@ DEBUG_LEVEL = 5
 
 # Параметры HTTP сервера для XML-RPC запросов
 SERVER_ADRES    = '0.0.0.0'
-SERVER_PORT     = 8888
+SERVER_PORT     = 8080
 SERVER_RPC_PATH = '/droidpressrpc2'
 SERVER_USER     = 'DroidPres'
 SERVER_PASSWD   = 'ohjaTho5gah2Ohyoh5Ug'
 
 # Модуль посредник для обменна данными
-PROXY_MODULE    = 'proxy_trukr_1c'
 #PROXY_MODULE    = 'proxy_demo_1c'
-#PROXY_MODULE    = 'proxy_demo_sqlite'
+PROXY_MODULE    = 'proxy_demo_sqlite'
 #PROXY_MODULE    = 'proxy_ctrader'
 
 WORK_DIR        = os.path.dirname(__file__).replace('\\','/') + '/'

@@ -32,11 +32,6 @@ SQL_SETDOCDET = '''
 insert into "document_det" ("document_id", "product_id", "qty", "discount", "price")
 values (?,?,?,?,?)
 '''
-SQL_LOCATION = '''
-insert into "location" ("date_location", "provider", "lat", "lon", "accuracy", "agent_id")
-values (?,?,?,?,?,?)
-'''
-
 
 Log = lambda str, err=False: pprint(str)
 
@@ -76,12 +71,10 @@ def __ExecuteStatement(sql, *params):
         cur = con.cursor()
         if params:
             cur.execute(sql, params)
-            lastrowid = cur.lastrowid
+            return cur.lastrowid
         else:
             cur.execute(sql)
-            lastrowid = cur.lastrowid
-        con.commit()
-        return lastrowid 
+            return cur.lastrowid
     except Exception as e:
         Log("ExecuteStatement:\t%s" % e, True)
         raise
@@ -139,10 +132,3 @@ def SetDoc(Doc, DocDet):
         __ExecuteStatement(SQL_SETDOCDET, doc_id, Det['product_id'], Det['qty'], 0 , Det['price'])
 
     return doc_id
-
-def SetLocation(AgentID, location):
-    for rec in location:
-        __ExecuteStatement(SQL_LOCATION, rec['date_location'], rec['provider'],
-                           rec['lat'], rec['lon'], rec['accuracy'], int(AgentID))
-    
-    return True

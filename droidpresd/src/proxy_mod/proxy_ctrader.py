@@ -4,7 +4,7 @@
 DB_PATH             = 'localhost:alter'
 DB_USER             = 'droidpres'
 DB_PASSWD           = 'dp654123'
-DB_TIMEOUT_MINUTES  = 3
+DB_TIMEOUT_MINUTES  = 1
 
 
 import traceback
@@ -37,7 +37,7 @@ select uniqueid "_ID",
        addresslaw,
        clienttypeid clientgroup_id,
        parentid parent_id
-from droidpres_client(?)
+from sprbeepres306_client(?)
 '''
 
 SQL_PRODUCT = '''
@@ -83,12 +83,6 @@ from bpoptions
 where agentid = ?
 '''
 
-SQL_LOCATION = '''
-insert into "agent_location" ("date_location", "provider", "lat", "lon", "accuracy", "agent_id")
-values (?,?,?,?,?,?)
-'''
-
-
 con = None
 
 _proc_params = {}
@@ -117,9 +111,10 @@ def chTimeOut():
     global work_time, con
     while 1:
         lcTimeOut.acquire()
-        if DEBUG_LEVEL > 5:
+        if DEBUG_LEVEL > 4:
             Log("CheckTimeOut:\t%f" % (time.time() - work_time))
-        breakFlag = (time.time() - work_time) > (DB_TIMEOUT_MINUTES * 60) and con and not con.closed
+        #breakFlag = (time.time() - work_time) > (DB_TIMEOUT_MINUTES * 60) and con and not con.closed
+        breakFlag = (time.time() - work_time) > (10) and con and not con.closed
         if breakFlag:
             con.close()
             if DEBUG_LEVEL > 0:
@@ -389,10 +384,3 @@ def SetDoc(Doc, DocDet):
         if DEBUG_LEVEL > 4:
             traceback.print_exc();
         raise
-    
-def SetLocation(AgentID, location):
-    for rec in location:
-        __ExecuteStatement(SQL_LOCATION, rec['date_location'], rec['provider'],
-                           rec['lat'], rec['lon'], rec['accuracy'], int(AgentID))
-    
-    return True
