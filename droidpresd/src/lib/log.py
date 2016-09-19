@@ -23,7 +23,7 @@ def Log(str, err_flag=False):
         line = "[%s]\t%s" % (strftime("%d.%m.%Y %H:%M:%S", localtime()), ' '.join(str.__str__().split()))
 
     line = line.replace('\\n', '')
-    
+
     if err_flag:
         print >> stderr, line
         stderr.flush()

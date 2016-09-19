@@ -34,7 +34,7 @@ class ServerDaemon(Daemon):
         start()
 
 if __name__ == '__main__':
-    if sys.platform == 'linux2':
+    if sys.platform == 'linux2OFF':
         daemon = ServerDaemon(pidfile='/var/run/droidpresd.pid', stdout='/var/log/droidpresd.log', stderr='/var/log/droidpresd.log')
         if len(sys.argv) == 2:
             if 'start' == sys.argv[1]:

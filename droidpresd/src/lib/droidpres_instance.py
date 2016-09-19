@@ -156,3 +156,80 @@ class DroidPresInstance:
         except Exception as e:
             Log(e, True)
             raise
+    
+    def ClSpr(self, AgentID):
+        try:
+            return proxy.ClSpr(AgentID)
+        except AttributeError as e:
+            Log(e, True)
+            return False
+        except Exception as e:
+            Log(e, True)
+            raise		
+    
+    
+    def SetClGr(self, AgentID, DocMes):
+        try:
+            return proxy.SetSpr(AgentID, DocMes, 1)
+        except AttributeError as e:
+            Log(e, True)
+            return False
+        except Exception as e:
+            Log(e, True)
+            raise		
+    
+    def SetCl(self, AgentID, DocMes):
+        try:
+            return proxy.SetSpr(AgentID, DocMes, 2)
+        except AttributeError as e:
+            Log(e, True)
+            return False
+        except Exception as e:
+            Log(e, True)
+            raise		
+    
+    def SetTovGr(self, AgentID, DocMes):
+        try:
+            return proxy.SetSpr(AgentID, DocMes, 3)
+        except AttributeError as e:
+            Log(e, True)
+            return False
+        except Exception as e:
+            Log(e, True)
+            raise		
+    
+    def SetTov(self, AgentID, DocMes):
+        try:
+            return proxy.SetSpr(AgentID, DocMes, 4)
+        except AttributeError as e:
+            Log(e, True)
+            return False
+        except Exception as e:
+            Log(e, True)
+            raise		
+    
+    def GetAllDocs(self, AgentID):
+        try:
+            data = proxy.GetAllDocs(AgentID)
+            return data
+        except AttributeError as e:
+            Log(e, True)
+            return False
+        except Exception as e:
+            Log(e, True)
+            raise		
+    
+    def SetLocation(self, AgentID, location):
+        try:
+            if not AgentID:
+                raise Exception(self.ERR_AgentID)
+
+            if DEBUG_LEVEL > 0:
+                Log("SetLocation:\t AgentID=%d, Location count=%d" % (AgentID, len(location)))
+            return proxy.SetLocation(AgentID, location)
+        except AttributeError as e:
+            Log(e, True)
+            return False
+        except Exception as e:
+            Log(e, True)
+            raise
