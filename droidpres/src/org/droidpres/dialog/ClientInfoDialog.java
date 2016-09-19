@@ -35,12 +35,12 @@ public class ClientInfoDialog {
 		LinearLayout layout = (LinearLayout) v.findViewById(R.id.list);
 		
 		Cursor _cur = DB.get().getReadableDatabase().query(DB.TABLE_CLIENT, null, 
-				BaseColumns._ID + clientId, null, null, null, null);
+				null, null, null, null, null);
 		if (!_cur.moveToFirst()) {
 			_cur.close();
 			return;
 		}
-		
+		//было BaseColumns._ID + clientId в selection, поменял на null
 		String str;
 		Float ft;
 

@@ -41,6 +41,9 @@
 		<activity android:name=".activity.ProductListActivity"
 			android:configChanges="orientation|keyboardHidden"/>
 		
+		<activity android:name=".activity.ProductListActivityPrice"
+			android:configChanges="orientation|keyboardHidden"/>
+		
 		<activity android:name=".activity.DocumentListActivity" android:label="@string/lb_documents"
 			android:configChanges="orientation|keyboardHidden"/>
 

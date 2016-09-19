@@ -30,5 +30,6 @@ public class Const {
 	public static final int DOCSTATE_EDIT		  =	0;
 	public static final int DOCSTATE_PREPARE_SEND =	1;
 	public static final int DOCSTATE_SEND		  =	2;
+	public static final String PRICE_REPLACE = "price_replace";
 
 }

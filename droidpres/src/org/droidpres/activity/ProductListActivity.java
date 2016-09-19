@@ -33,6 +33,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.text.Html;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -55,11 +57,15 @@ public class ProductListActivity extends AbsListActivity implements FilterQueryP
 	private static final int MENU_HEAD 		= Menu.FIRST + 2;
 	private static final int MENU_CLEAN 	= Menu.FIRST + 3;
 	private static final int MENU_SAVE	 	= Menu.FIRST + 4;
+	private static final int MENU_HANDTRADE	= Menu.FIRST + 5;
 
 	private static final int DLG_QUERY_SAVE_DOCUMENT = 1;
 	private static final int DLG_QUERY_STATE_DOCUMENT = 2;
 	private static final int DLG_PRODUCT_GROUP = 3;
 	private static final int DLG_DOCHEAD = 4;
+	private static final int DLG_HANDTRADE = 5;
+
+	private static final int A_RESULT_PRICE = 101;
 
 	private TextView mTvDocTotal;
 	private Bundle mActivityExtras; 
@@ -68,10 +74,22 @@ public class ProductListActivity extends AbsListActivity implements FilterQueryP
 	private boolean mFiltredFlag = false;
 	private boolean mAvailableSaveFlag;
 	private float mOldQty = 1;
+	
+	//  Ручная торговля
+	public static boolean handTrade;
+	public static boolean StrikeText = false;
+	// Позиция и id итема в списке для ручной торговли
+	private int posItem;
+	private int posId;
+	// Отображение новой и старой цены в ручной торговле
+	TextView newPrice;
+	TextView oldPrice;
+
+	private long itemId;
 
 	public ProductListActivity() {
 		super(R.layout.product_list, DB.TABLE_PRODUCT,
-				new String[] {"_id", "name", "available", "price", "casesize", "productgroup_id"},
+				new String[] {"_id", "name", "available", "price", "casesize", "productgroup_id", "new_price"},
 				"sortorder");
 	}
 
@@ -113,8 +131,8 @@ public class ProductListActivity extends AbsListActivity implements FilterQueryP
 		return new ProductListAdapter(this,
 				R.layout.product_list_item,
 				cursor,
-                new String[] {"name", "available", "price", "_id"}, 
-                new int[] {R.id.tvDocGoods, R.id.tvDocAvilable, R.id.tvDocPrice, R.id.tvDocQty});
+                new String[] {"name", "available", "price", "_id", "new_price"}, 
+                new int[] {R.id.tvDocGoods, R.id.tvDocAvilable, R.id.tvDocPrice, R.id.tvDocQty, R.id.NewtvDocPrice});
 	}
 
 	@Override
@@ -123,12 +141,12 @@ public class ProductListActivity extends AbsListActivity implements FilterQueryP
 	}
 
 	/** 
-	 * Основное меню
+	 * РћСЃРЅРѕРІРЅРѕРµ РјРµРЅСЋ
 	 */
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
-		menu.add(0, MENU_GROUP, Menu.NONE, R.string.lb_client_group).
+		menu.add(0, MENU_GROUP, Menu.NONE, R.string.lb_product_group).
 		setIcon(android.R.drawable.ic_menu_directions);
 
 		menu.add(0, MENU_SEARCH, Menu.NONE, R.string.lb_search).
@@ -147,7 +165,7 @@ public class ProductListActivity extends AbsListActivity implements FilterQueryP
 	}
 
 	/** 
-	 * Выполнение основного меню
+	 * Р’С‹РїРѕР»РЅРµРЅРёРµ РѕСЃРЅРѕРІРЅРѕРіРѕ РјРµРЅСЋ
 	 */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
@@ -170,12 +188,14 @@ public class ProductListActivity extends AbsListActivity implements FilterQueryP
 		case (MENU_SAVE):
 			showDialog(DLG_QUERY_STATE_DOCUMENT);
 			return true;
+		case (MENU_HANDTRADE):
+			showDialog(DLG_HANDTRADE);
 		}
 		return false;		
 	}
 	
 	/**
-	 * Перехват аппаратных клавиш
+	 * РџРµСЂРµС…РІР°С‚ Р°РїРїР°СЂР°С‚РЅС‹С… РєР»Р°РІРёС€
 	 */
 	public boolean onKey(View v, int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN &&
@@ -192,25 +212,43 @@ public class ProductListActivity extends AbsListActivity implements FilterQueryP
 	}
 
 	/**
-	 * При выборе товара из списка
+	 * РџСЂРё РІС‹Р±РѕСЂРµ С‚РѕРІР°СЂР° РёР· СЃРїРёСЃРєР°
 	 */
 	@Override
 	protected void onListItemClick(ListView l, View v, int pos, long id) {
 		super.onListItemClick(l, v, pos, id);
+		posItem = pos;
+		posId = (int) id;
 		ProductListAdapter adp = (ProductListAdapter) mAdapter; 
 		float _qty = adp.mDocData.getQty(id);
-		if (_qty > 0) {
-			ChangeQty(id, _qty + mOldQty, QueryHelper.fieldByNameFloat(getCursor(), "price"),
-					QueryHelper.fieldByNameFloat(getCursor(), "casesize"));
+	    
+		newPrice = (TextView) v.findViewById(R.id.NewtvDocPrice);
+		oldPrice = (TextView) v.findViewById(R.id.tvDocPrice);
+		
+		
+		if (!handTrade) {
+			if (_qty > 0) {
+				ChangeQty(id, _qty + mOldQty, QueryHelper.fieldByNameFloat(getCursor(), "price"),
+						QueryHelper.fieldByNameFloat(getCursor(), "casesize"));
+				newPrice.setText("");
+			} else {
+				ChangeQty(id, mOldQty, QueryHelper.fieldByNameFloat(getCursor(), "price"),
+						QueryHelper.fieldByNameFloat(getCursor(), "casesize"));
+				newPrice.setText("");
+			}
 		} else {
-			ChangeQty(id, mOldQty, QueryHelper.fieldByNameFloat(getCursor(), "price"),
-					QueryHelper.fieldByNameFloat(getCursor(), "casesize"));
+			List<MenuItemInfo> menus = createContextMenus(pos, id);
+			newPrice = (TextView) v.findViewById(R.id.NewtvDocPrice);
+			oldPrice = (TextView) v.findViewById(R.id.tvDocPrice);
+			if (menus == null) return; 
 		}
+		
 	}
 
 
 	@Override
 	protected List<MenuItemInfo> createContextMenus(int position, long id) {
+	    itemId = id;
 		Cursor cur = getCursor();
 		ProductListAdapter adp = (ProductListAdapter) mAdapter; 
 	
@@ -232,9 +270,33 @@ public class ProductListActivity extends AbsListActivity implements FilterQueryP
 		startActivityForResult(intent, A_RESULT_QTY);
 		return null;
 	}
+	
+	protected List<MenuItemInfo> createContextMenusPrice(int position, long id) {
+		Cursor cur = getCursor();
+		ProductListAdapter adp = (ProductListAdapter) mAdapter; 
+	
+		cur.moveToPosition(position);
+		Intent intent = new Intent(this, InputQtyActivity.class);
+		intent.putExtra(Const.EXTRA_PRODUCT_NAME, QueryHelper.fieldByNameString(cur, "name"));
+		intent.putExtra(Const.EXTRA_PRODUCT_ID, id);
+		intent.putExtra(Const.EXTRA_PRICE, QueryHelper.fieldByNameFloat(cur, "price"));
+		intent.putExtra(Const.EXTRA_CASESIZE, QueryHelper.fieldByNameFloat(cur, "casesize"));
+		
+		float tqty = adp.mDocData.getQty(id);
+		if (tqty > 0) {
+			if (adp.mCaseShowFlag) {
+				intent.putExtra(Const.EXTRA_QTY, tqty / QueryHelper.fieldByNameFloat(cur, "casesize"));
+			} else {
+				intent.putExtra(Const.EXTRA_QTY, tqty);
+			}
+		}
+		intent.putExtra(Const.PRICE_REPLACE, "price");
+		startActivityForResult(intent, A_RESULT_PRICE);
+		return null;
+	}
 
 	/**
-	 * При нажатии на Button
+	 * РџСЂРё РЅР°Р¶Р°С‚РёРё РЅР° Button
 	 */
 	public void onClick(View v) {
 		switch (v.getId()) {
@@ -268,14 +330,14 @@ public class ProductListActivity extends AbsListActivity implements FilterQueryP
 	}
 	
 	/**
-	 * Генерация диалогов
+	 * Р“РµРЅРµСЂР°С†РёСЏ РґРёР°Р»РѕРіРѕРІ
 	 */
 	@Override
 	protected Dialog onCreateDialog(int dialogID) {
 		super.onCreateDialog(dialogID);
 		
 		switch (dialogID) {
-		case DLG_QUERY_SAVE_DOCUMENT: // Диалог запроса на сохранение документа
+		case DLG_QUERY_SAVE_DOCUMENT: // Р”РёР°Р»РѕРі Р·Р°РїСЂРѕСЃР° РЅР° СЃРѕС…СЂР°РЅРµРЅРёРµ РґРѕРєСѓРјРµРЅС‚Р°
 			return new AlertDialog.Builder(this)
 			.setTitle(android.R.string.dialog_alert_title)
 			.setIcon(android.R.drawable.ic_dialog_alert)
@@ -294,8 +356,9 @@ public class ProductListActivity extends AbsListActivity implements FilterQueryP
 				}
 				
 			})
-			.create();  // END: Диалог запроса на сохранение документа
-		case DLG_QUERY_STATE_DOCUMENT: // Диалог запроса статуса документа
+			.create();  // END: Р”РёР°Р»РѕРі Р·Р°РїСЂРѕСЃР° РЅР° СЃРѕС…СЂР°РЅРµРЅРёРµ РґРѕРєСѓРјРµРЅС‚Р°
+			
+		case DLG_QUERY_STATE_DOCUMENT: // Р”РёР°Р»РѕРі Р·Р°РїСЂРѕСЃР° СЃС‚Р°С‚СѓСЃР° РґРѕРєСѓРјРµРЅС‚Р°
 			return new AlertDialog.Builder(this).
 			setTitle(R.string.lb_documents_status).
 			setItems(R.array.itemDocState, new DialogInterface.OnClickListener() {
@@ -306,14 +369,14 @@ public class ProductListActivity extends AbsListActivity implements FilterQueryP
 				
 			}).create();
 	
-		case DLG_PRODUCT_GROUP: // Диалог группы товара
+		case DLG_PRODUCT_GROUP: // Р”РёР°Р»РѕРі РіСЂСѓРїРїС‹ С‚РѕРІР°СЂР°
 			Cursor cursor = mDataBase.rawQuery("select _id, name from " +
 					DB.TABLE_PRODUCT_GROUP + "\n" +
 					"where _id in (select distinct productgroup_id from product) order by name", null);
 	
 			final CharSequence[] names = new CharSequence[cursor.getCount()+1];  
 			final int[] ids = new int[cursor.getCount()+1];  
-			names[0] = "Вся продукция";
+			names[0] = "Все продукты";
 			ids[0] = 0;
 			
 			int i = 1;
@@ -359,7 +422,7 @@ public class ProductListActivity extends AbsListActivity implements FilterQueryP
 	}
 
 	/**
-	 *  Подготовка диалога
+	 *  РџРѕРґРіРѕС‚РѕРІРєР° РґРёР°Р»РѕРіР°
 	 */
 	@Override
 	protected void onPrepareDialog(int dialogID, Dialog dialog) {
@@ -380,11 +443,36 @@ public class ProductListActivity extends AbsListActivity implements FilterQueryP
 		
 		switch (requestCode) {
 		case A_RESULT_QTY:
-			float tqty = data.getFloatExtra(Const.EXTRA_QTY, 0);
-			ChangeQty(data.getLongExtra(Const.EXTRA_PRODUCT_ID, 0),tqty,
-					data.getFloatExtra(Const.EXTRA_PRICE, 0), data.getFloatExtra(Const.EXTRA_CASESIZE, 0));
-			if (tqty > 0) mOldQty = tqty;
-			break;
+			if (!handTrade) {
+				float tqty = data.getFloatExtra(Const.EXTRA_QTY, 0);
+				ChangeQty(data.getLongExtra(Const.EXTRA_PRODUCT_ID, 0),tqty,
+						data.getFloatExtra(Const.EXTRA_PRICE, 0), data.getFloatExtra(Const.EXTRA_CASESIZE, 0));
+				if (tqty > 0) mOldQty = tqty;
+				break;
+			} else {
+				float tqty = data.getFloatExtra(Const.EXTRA_QTY, 0);
+				ChangeQty(data.getLongExtra(Const.EXTRA_PRODUCT_ID, 0),tqty,
+						data.getFloatExtra(Const.EXTRA_PRICE, 0), data.getFloatExtra(Const.EXTRA_CASESIZE, 0));
+				if (tqty > 0) mOldQty = tqty;
+				List<MenuItemInfo> menus = createContextMenusPrice(posItem, posId);
+				if (menus == null) return;
+				StrikeText = true;
+				break;
+			}
+			
+		case A_RESULT_PRICE:
+			if (handTrade) {
+				float tqty = data.getFloatExtra(Const.EXTRA_QTY, 0);
+				Float price = data.getFloatExtra(Const.EXTRA_PRICE, 0);
+				
+				ChangeQty(data.getLongExtra(Const.EXTRA_PRODUCT_ID, 0),tqty,
+						data.getFloatExtra(Const.EXTRA_PRICE, 0), data.getFloatExtra(Const.EXTRA_CASESIZE, 0));
+				if (tqty > 0) mOldQty = tqty;
+				
+				StrikeText = true;
+				
+			}
+			
 		}
 	}
 	
@@ -415,6 +503,7 @@ public class ProductListActivity extends AbsListActivity implements FilterQueryP
 		cval.put("presventype",	mActivityExtras.getInt(Const.EXTRA_DOC_PRESVEN, 0));
 		cval.put("client_id", 	mActivityExtras.getLong(Const.EXTRA_CLIENT_ID, 0));
 		cval.put("itemcount", 	adp.mDocData.getQtySumm());
+		cval.put("itemcount", 	adp.mDocData.getQtySumm());
 		cval.put("mainsumm", 	adp.mDocData.getSumm());
 		cval.put("description", 	mActivityExtras.getString(Const.EXTRA_DOC_DESC).trim());
 		cval.put("typedoc_id",	mActivityExtras.getInt(Const.EXTRA_DOC_TYPE, 0));
@@ -436,13 +525,13 @@ public class ProductListActivity extends AbsListActivity implements FilterQueryP
 			adp.mDocData.Save(_id, mDataBase);
 		}
 	
-		// TODO: Сделать с этим что то
+		// TODO: РЎРґРµР»Р°С‚СЊ СЃ СЌС‚РёРј С‡С‚Рѕ С‚Рѕ
 		switch (doc_state) {
 		case 0:
-			Utils.ToastMsg(this, "Документ сохранен до следующего изменения.");			
+			Utils.ToastMsg(this, "Документ сохранён до следующего изменения ");			
 			break;
 		case 1:
-			Utils.ToastMsg(this, "Документ сохранен и подготовлен к отправке.");			
+			Utils.ToastMsg(this, "Документ сохранён и готов к отправке");			
 			break;
 		}
 		finish();

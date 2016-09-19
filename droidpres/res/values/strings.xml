@@ -132,6 +132,7 @@
     <string name="lb_doc_status_preparesend">Готов к отправке</string>
 	<string name="lb_on_gps">Включить GPS</string>
 	<string name="lb_gps_location">GPS Мониторинг</string>
+	<string name="lb_hand_trade">Ручная торговля</string>
 		
 	<string name="lb_cl_id">Код</string>
 	<string name="lb_cl_debtsumm1">Задолженность по 1-й форме оплаты</string>
@@ -185,6 +186,7 @@
     <string name="msg_NoDoc">Нет документов</string>
     <string name="msg_NoClient">Нет торговых точек</string>
     <string name="msg_NoProduct">Нет продукции</string>
+    <string name="msg_hand_trade_enable">Включить режим ручной торговли?</string>
     <string name="msg_AreUpdateApk">Получено обновление программы: %d byte.</string>
     <string name="msg_UpdateApk">Сейчас будет запущенно обновление программы. На вопросы установщика ответьте положительно и подтвердите установку.</string>
     <string name="msg_NoOnGPS">Запрещен запуск программы без включенного GPS.\nПерейти к настройкам?</string>

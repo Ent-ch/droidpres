@@ -20,6 +20,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 public class DocData implements Parcelable {
 	private static final int QTY = 0;
@@ -119,6 +120,7 @@ public class DocData implements Parcelable {
 		Cursor cursor = db.query(DB.TABLE_DOCUMENT_DET,
 				new String[] {"product_id", "qty", "price"},
 				"document_id = " + id, null, null, null, null);
+		
 
 		if (cursor.moveToFirst()) {
 			StartUpdate();
@@ -137,6 +139,7 @@ public class DocData implements Parcelable {
 			_val.put("product_id", goodsID);
 			_val.put("qty", getQty(goodsID));
 			_val.put("price", getPrice(goodsID));
+			Log.v("save price - ", goodsID + " - " + Float.valueOf(getPrice(goodsID)).toString());
 			db.insert(DB.TABLE_DOCUMENT_DET, null, _val);
 			_val.clear();
 		}

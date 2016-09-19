@@ -36,6 +36,7 @@ public class InputQtyActivity extends Activity implements OnClickListener, OnTou
 	private TextView mTvMessage;
 	private Bundle mParams;
 	private StringBuffer mQtyBuffer;
+	private String mTitle;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -48,12 +49,20 @@ public class InputQtyActivity extends Activity implements OnClickListener, OnTou
 		} else {
 			mParams = getIntent().getExtras();
 		}
-
+		
 		mQtyBuffer = new StringBuffer();
-
 		mBtQtyPoint = (Button) findViewById(R.id.btQtyPoint); 
 		mEdQty = (EditText) findViewById(R.id.eQty);
 		mTvMessage = (TextView) findViewById(R.id.tvQtyGoodsInfo);
+		
+		// ������ ���� � ����������� �� ���� ��� ������(���� ��� ����������)
+		if (mParams.getString(Const.PRICE_REPLACE) != null) {
+			mTitle = "Цена: " + mParams.getString(Const.EXTRA_PRODUCT_NAME);
+			mTvMessage.setText(mTitle);
+		} else {
+			mTitle = "Количество: " + mParams.getString(Const.EXTRA_PRODUCT_NAME);
+			mTvMessage.setText(mTitle);
+		}
 				
 		if (SetupActivity.getVibration(this)) {
 			mVibrator = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
@@ -101,10 +110,10 @@ public class InputQtyActivity extends Activity implements OnClickListener, OnTou
 		});
 		
 		
-		if (mParams != null) {
-			mTvMessage.setText(mParams.getString(Const.EXTRA_PRODUCT_NAME));
-			setQty(mParams.getFloat(Const.EXTRA_QTY));
-		}
+//		if (mParams != null) {
+//			mTvMessage.setText(mParams.getString(Const.EXTRA_PRODUCT_NAME));
+//			setQty(mParams.getFloat(Const.EXTRA_QTY));
+//		}
 
 	}
 	
@@ -223,10 +232,18 @@ public class InputQtyActivity extends Activity implements OnClickListener, OnTou
 	}
 	
 	private void close() {
+		if (mParams.getString(Const.PRICE_REPLACE) != null) {
+			mParams.putFloat(Const.EXTRA_PRICE, getQty());
+			Intent data = new Intent();		
+			data.putExtras(mParams);
+			setResult(RESULT_OK, data);
+			finish();
+		} else {
 		mParams.putFloat(Const.EXTRA_QTY, getQty());
 		Intent data = new Intent();		
 		data.putExtras(mParams);
 		setResult(RESULT_OK, data);
 		finish();
+		}
 	}
 }

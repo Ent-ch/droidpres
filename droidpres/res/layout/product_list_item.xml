@@ -31,14 +31,21 @@
 						android:textColor="#00FF00"/>
 					<TextView android:id="@+id/tvDocPrice"
 						android:layout_height="wrap_content" android:layout_width="wrap_content"
-						android:textColor="#00FFFF" 
-						android:paddingLeft="6px"/>
+						android:textColor="#00FFFF" />
+					<TextView
+					    android:id="@+id/NewtvDocPrice"
+					    android:layout_width="wrap_content"
+					    android:layout_height="wrap_content"
+					    android:paddingLeft="6px"
+					    android:textColor="#FFA500" />
 					<TextView android:id="@+id/tvDocQty"
-						android:layout_height="wrap_content" android:layout_width="wrap_content"
-						android:textColor="#ff0000"
+						android:layout_height="wrap_content" 
+						android:layout_width="wrap_content"
+						android:textColor="#FFA500"
 						android:textSize="16sp"
 						android:gravity="right"
 						android:layout_weight="1"
-						android:textStyle="bold"/>
+						android:textStyle="bold"
+						/>
 			</LinearLayout>
 </LinearLayout>

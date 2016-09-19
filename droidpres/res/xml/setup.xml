@@ -24,5 +24,10 @@
       			android:key="@string/SETUP_ROOT" 
       			android:title="@string/lb_setup_root"
       			android:summary="Требуется авторизация"/> 
+      	
+   		<CheckBoxPreference
+      			android:key="chb" 
+      			android:title="@string/lb_hand_trade"
+      			/> 		
 	</PreferenceCategory>
 </PreferenceScreen>

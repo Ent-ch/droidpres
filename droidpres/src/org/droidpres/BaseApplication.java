@@ -25,10 +25,10 @@ public class BaseApplication extends Application {
 		sInstance = this;
 		
 		try {
-			PackageInfo pi = getPackageManager().getPackageInfo(getPackageName(), 0);
+			PackageInfo pi  = getPackageManager().getPackageInfo(getPackageName(), 0);
 			VERSION = pi.versionName;
 			VERSION_CODE = pi.versionCode;
-			FULL_VERSION = VERSION + '.' + VERSION_CODE;  
+			FULL_VERSION = VERSION + '.' + VERSION_CODE;
 		} catch (NameNotFoundException e) { }
 		
 		schedule(this);

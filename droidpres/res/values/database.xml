@@ -58,7 +58,8 @@ CREATE TABLE IF NOT EXISTS "product" (
   "sortorder" INTEGER, 
   "casesize" FLOAT, 
   "price" CURRENCY,
-  "available" FLOAT);
+  "available" FLOAT,
+  "new_price" CURRENCY);
 </item>
 
 <item>

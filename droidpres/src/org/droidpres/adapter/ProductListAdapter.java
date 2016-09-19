@@ -13,13 +13,17 @@ package org.droidpres.adapter;
 import java.text.DecimalFormat;
 
 import org.droidpres.R;
+import org.droidpres.activity.ProductListActivity;
 import org.droidpres.activity.SetupRootActivity;
 import org.droidpres.db.QueryHelper;
 import org.droidpres.utils.DocData;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Paint;
+import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.SimpleCursorAdapter.ViewBinder;
@@ -31,9 +35,11 @@ public class ProductListAdapter extends SimpleCursorAdapter implements ViewBinde
 	public DecimalFormat cf;
 	private long mId;
 	private float mQty;
-	private float mAvailable, mPrice, mCasesize;
+	private float mAvailable, mPrice, mCasesize, mNewPrice;
 	public boolean mCaseShowFlag;
 	public DocData mDocData;
+	
+	public ProductListActivity prAct;
 
 	public ProductListAdapter(Context context, int layout, Cursor cursor, String[] from, int[] to) {
 		super(context, layout, cursor, from, to);
@@ -68,13 +74,51 @@ public class ProductListAdapter extends SimpleCursorAdapter implements ViewBinde
 			} else ((TextView) view).setText("");
 			return true;
 		case 3: // price Цена товара 
+			prAct = new  ProductListActivity();
 			mPrice = cursor.getFloat(columnIndex);
-			if (mPrice > 0.0) { 
-				if (mCaseShowFlag) ((TextView) view).setText(cf.format(mPrice * mCasesize));
-				else ((TextView) view).setText(cf.format(mPrice));
-			} else ((TextView) view).setText("");
-			return true;
 			
+			if (!prAct.handTrade) {
+				if (mPrice > 0.0) { 
+					if (mCaseShowFlag) { 
+						((TextView) view).setText(cf.format(mPrice * mCasesize)); 
+//						((TextView) view).setPaintFlags(((TextView) view).getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+					}
+					else { 
+					((TextView) view).setText(cf.format(mPrice));
+//					((TextView) view).setPaintFlags(((TextView) view).getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+					}
+				} else ((TextView) view).setText("");
+				Log.v("qty", "handtrade - false");
+				return true;
+			} else if (prAct.handTrade ) {
+				Log.v("qty", "handtrade - true");
+				if (mPrice > 0.0) { 
+					if (mCaseShowFlag) {
+						if (prAct.StrikeText) {
+							((TextView) view).setText(cf.format(mPrice * mCasesize));
+						} else {
+							((TextView) view).setText(cf.format(mPrice * mCasesize));
+						}
+					}
+					else {
+						if (prAct.StrikeText ) {
+							((TextView) view).setText(cf.format(mPrice));
+						} else {
+							((TextView) view).setText(cf.format(mPrice));
+						}
+					}
+				} else ((TextView) view).setText("");
+			}
+				return true;
+		case 6:
+			mNewPrice = mDocData.getPrice(mId);
+			if (!prAct.handTrade || mNewPrice == 0 || mNewPrice == mPrice) {
+				((TextView) view).setText(" ");
+			} else {
+				((TextView) view).setText("Новая цена: " + mNewPrice);
+			}
+			
+			return true;
 		default:
 			return false;
 		}

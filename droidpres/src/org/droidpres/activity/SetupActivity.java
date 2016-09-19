@@ -13,24 +13,60 @@ package org.droidpres.activity;
 import org.droidpres.R;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
 import android.preference.Preference;
+import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
+import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 public class SetupActivity extends PreferenceActivity {
+
+	private static final int DLG_HANDTRADE = 0;
+	public ProductListActivity prAct = new ProductListActivity();
+	private CheckBoxPreference chb;
+	private boolean chbsOn = false;
+	private boolean chbsOff = false;
+
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		addPreferencesFromResource(R.xml.setup);
+		
+		chb =  (CheckBoxPreference) findPreference("chb");
+		if (prAct.handTrade) {
+			chb.setChecked(true);
+			chbsOn = true;
+		} else {
+			chb.setChecked(false);
+			chbsOn = false;
+		}
+		
+		chb.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+			
+			@Override
+			public boolean onPreferenceClick(Preference preference) {
+				// TODO Auto-generated method stub
+				if (chbsOn) {
+					prAct.handTrade = false;
+				} else {
+					prAct.handTrade = true;
+				}
+				return false;
+			}
+		});
+ 
 	}
 
 	@Override
@@ -38,6 +74,11 @@ public class SetupActivity extends PreferenceActivity {
 		super.onPreferenceTreeClick(preferenceScreen, preference);
 		if (preference.getKey().equals(getString(R.string.SETUP_ROOT))) {
 			startSetupRoot();
+			return true;
+		}
+		if (preference.getKey().equals(getString(R.string.lb_hand_trade))) {
+			
+//			setHandTrade();
 			return true;
 		}
 		return false;
@@ -67,10 +108,20 @@ public class SetupActivity extends PreferenceActivity {
 		}
 	}
 	
-	
 	public static boolean getVibration(Context context) {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 		return sharedPreferences.getBoolean(context.getString(R.string.VIBRATION_QTY), true);
+	}
+	
+	private void makesToastTrue() {
+		// TODO Auto-generated method stub
+		Toast.makeText(this, "Включён режим Ручной торговли", Toast.LENGTH_LONG).show();
+
+	}
+	private void makesToastFalse() {
+		// TODO Auto-generated method stub
+		Toast.makeText(this, "Выключить режим Ручной торговли", Toast.LENGTH_LONG).show();
+
 	}
 
 }
